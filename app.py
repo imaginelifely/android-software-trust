@@ -610,13 +610,21 @@ if page == "overview":
             text=f"<b>Weights</b>", x=0.5, y=0.5,
             font=dict(size=13, color="#E8F0FE"), showarrow=False,
         )
-        fig_w.update_layout(
-            **PLOTLY_LAYOUT,
+        # Merge the shared layout first, then override its legend settings.
+        # Passing **PLOTLY_LAYOUT and legend= separately duplicates the keyword.
+        weight_layout = dict(PLOTLY_LAYOUT)
+        weight_layout.update(
             title=dict(text="Active Fusion Weights", font=dict(size=13, color=WHITE), x=0),
-            showlegend=True, height=220,
-            legend=dict(orientation="h", yanchor="bottom", y=-0.15, xanchor="center", x=0.5),
+            showlegend=True,
+            height=220,
+            legend=dict(
+                orientation="h", yanchor="bottom", y=-0.15,
+                xanchor="center", x=0.5,
+                bgcolor="rgba(0,0,0,0)", font=dict(size=11),
+            ),
             margin=dict(l=10, r=10, t=36, b=30),
         )
+        fig_w.update_layout(**weight_layout)
         st.plotly_chart(fig_w, use_container_width=True)
 
         # Key findings summary
