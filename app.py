@@ -610,13 +610,18 @@ if page == "overview":
             text=f"<b>Weights</b>", x=0.5, y=0.5,
             font=dict(size=13, color="#E8F0FE"), showarrow=False,
         )
-        fig_w.update_layout(
+        # Merge the shared theme and chart-specific options before passing them
+        # to Plotly. Passing `legend` both through PLOTLY_LAYOUT and explicitly
+        # causes update_layout() to raise a duplicate-keyword TypeError.
+        weight_layout = {
             **PLOTLY_LAYOUT,
-            title=dict(text="Active Fusion Weights", font=dict(size=13, color=WHITE), x=0),
-            showlegend=True, height=220,
-            legend=dict(orientation="h", yanchor="bottom", y=-0.15, xanchor="center", x=0.5),
-            margin=dict(l=10, r=10, t=36, b=30),
-        )
+            "title": dict(text="Active Fusion Weights", font=dict(size=13, color=WHITE), x=0),
+            "showlegend": True,
+            "height": 220,
+            "legend": dict(orientation="h", yanchor="bottom", y=-0.15, xanchor="center", x=0.5),
+            "margin": dict(l=10, r=10, t=36, b=30),
+        }
+        fig_w.update_layout(**weight_layout)
         st.plotly_chart(fig_w, use_container_width=True)
 
         # Key findings summary
