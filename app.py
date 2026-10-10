@@ -125,11 +125,17 @@ html, body, .stApp, [class*="css"] {
 
 /* ─── Cards ──────────────────────────── */
 .card {
-  background: var(--bg-card); border: 1px solid var(--border);
-  border-radius: 12px; padding: 20px 22px;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  background: linear-gradient(145deg, rgba(15, 25, 42, 0.98), rgba(8, 13, 22, 0.98));
+  border: 1px solid var(--border);
+  border-radius: 16px; padding: 22px;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.12);
+  transition: border-color 0.22s ease, box-shadow 0.22s ease, transform 0.22s ease;
 }
-.card:hover { border-color: var(--border-hover); }
+.card:hover {
+  border-color: var(--border-hover);
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.20), 0 0 22px rgba(0, 212, 255, 0.045);
+  transform: translateY(-2px);
+}
 .card-glow { box-shadow: var(--glow-cyan); }
 .card-danger { border-color: rgba(255,58,92,0.35); box-shadow: var(--glow-danger); }
 .card-safe { border-color: rgba(34,197,94,0.35); box-shadow: 0 0 20px rgba(34,197,94,0.15); }
@@ -138,12 +144,25 @@ html, body, .stApp, [class*="css"] {
 /* ─── KPI tiles ──────────────────────── */
 .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin: 16px 0; }
 .kpi-tile {
-  background: var(--bg-card); border: 1px solid var(--border);
-  border-radius: 10px; padding: 16px 18px; position: relative; overflow: hidden;
+  background: linear-gradient(145deg, rgba(15, 25, 42, 0.98), rgba(8, 13, 22, 0.98));
+  border: 1px solid var(--border); border-radius: 14px;
+  padding: 18px; position: relative; overflow: hidden;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease;
 }
 .kpi-tile::before {
-  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
-  background: linear-gradient(90deg, var(--accent-cyan), var(--accent-violet));
+  content: ''; position: absolute; top: 0; left: 12px; right: 12px; height: 2px;
+  background: linear-gradient(90deg, var(--accent-cyan), var(--accent-blue), var(--accent-violet));
+  border-radius: 0 0 4px 4px;
+}
+.kpi-tile::after {
+  content: ''; position: absolute; width: 120px; height: 120px; right: -58px; top: -66px;
+  background: radial-gradient(circle, rgba(0, 212, 255, 0.09), transparent 70%);
+  pointer-events: none;
+}
+.kpi-tile:hover {
+  transform: translateY(-3px); border-color: rgba(0, 212, 255, 0.34);
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.20), 0 0 18px rgba(0, 212, 255, 0.05);
 }
 .kpi-label { font-size: 11px; color: var(--text-muted); font-weight: 600;
   text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; }
@@ -296,34 +315,61 @@ div[data-testid="stTabs"] [aria-selected="true"] {
 
 /* Responsive application header */
 .app-hero {
-  display: flex; align-items: center; justify-content: space-between; gap: 20px;
-  padding: 22px clamp(16px, 3vw, 36px);
-  min-height: 104px; box-sizing: border-box;
-  background: linear-gradient(135deg, #0A1220 0%, #101C2E 100%);
-  border-bottom: 1px solid rgba(148, 163, 184, 0.16);
+  display: flex; align-items: center; justify-content: space-between; gap: 24px;
+  padding: 26px clamp(16px, 3vw, 38px);
+  min-height: 126px; box-sizing: border-box; position: relative; isolation: isolate; overflow: hidden;
+  background:
+    radial-gradient(ellipse at 78% 0%, rgba(68, 136, 255, 0.18), transparent 36%),
+    radial-gradient(ellipse at 12% 110%, rgba(0, 212, 255, 0.12), transparent 42%),
+    linear-gradient(120deg, #070C15 0%, #0B1627 52%, #101C31 100%);
+  border-bottom: 1px solid rgba(148, 163, 184, 0.18);
+  box-shadow: 0 12px 34px rgba(0, 0, 0, 0.16);
 }
-.app-hero-brand { display: flex; align-items: center; gap: 14px; min-width: 0; }
-.app-hero-shield { font-size: 30px; flex: 0 0 auto; }
+.app-hero::before {
+  content: ''; position: absolute; inset: auto 0 0; height: 1px; z-index: -1;
+  background: linear-gradient(90deg, transparent, rgba(0,212,255,.65), rgba(139,92,246,.55), transparent);
+}
+.app-hero-brand { display: flex; align-items: center; gap: 16px; min-width: 0; }
+.app-hero-shield {
+  display: grid; place-items: center; width: 56px; height: 56px; flex: 0 0 56px;
+  font-size: 28px; border-radius: 16px;
+  background: linear-gradient(145deg, rgba(0,212,255,.15), rgba(68,136,255,.08));
+  border: 1px solid rgba(0,212,255,.26);
+  box-shadow: 0 0 28px rgba(0,212,255,.08), inset 0 1px rgba(255,255,255,.06);
+}
 .app-hero-copy { min-width: 0; }
-.app-hero-title { color: #F1F5F9; font-size: clamp(18px, 2vw, 24px); font-weight: 750; line-height: 1.2; }
-.app-hero-subtitle { color: #A7B4C8; font-size: 12px; margin-top: 5px; line-height: 1.45; }
-.app-hero-status { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; }
-.status-pill { padding: 5px 10px; border-radius: 999px; font-size: 10px; font-weight: 700;
-  color: #BAE6FD; background: rgba(56, 189, 248, 0.10); border: 1px solid rgba(56, 189, 248, 0.24); }
-.status-pill-muted { color: #CBD5E1; background: rgba(148, 163, 184, 0.08); border-color: rgba(148, 163, 184, 0.18); }
+.app-hero-eyebrow {
+  color: #67E8F9; font-size: 9px; font-weight: 800; letter-spacing: .19em;
+  text-transform: uppercase; margin-bottom: 7px;
+}
+.app-hero-title {
+  color: #F8FAFC; font-size: clamp(21px, 2.4vw, 29px); font-weight: 800;
+  letter-spacing: -.035em; line-height: 1.12;
+  text-shadow: 0 2px 24px rgba(0,212,255,.10);
+}
+.app-hero-subtitle { color: #A7B4C8; font-size: 12px; margin-top: 7px; line-height: 1.5; }
+.app-hero-status { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; align-items: center; }
+.status-pill { padding: 7px 11px; border-radius: 999px; font-size: 10px; font-weight: 750;
+  color: #BAE6FD; background: rgba(56, 189, 248, 0.10); border: 1px solid rgba(56, 189, 248, 0.24);
+  box-shadow: inset 0 1px rgba(255,255,255,.035); white-space: nowrap; }
+.status-pill-muted { color: #CBD5E1; background: rgba(148, 163, 184, 0.07); border-color: rgba(148, 163, 184, 0.18); }
 
 /* Native sidebar radio styled as a clear navigation list */
 [data-testid="stSidebar"] [data-testid="stRadio"] > label { display: none; }
 [data-testid="stSidebar"] [data-testid="stRadio"] [role="radiogroup"] { gap: 4px; }
 [data-testid="stSidebar"] [data-testid="stRadio"] [role="radiogroup"] label {
-  padding: 9px 11px; border: 1px solid transparent; border-radius: 8px;
-  transition: background .15s ease, border-color .15s ease;
+  padding: 10px 12px; margin: 3px 0; border: 1px solid transparent; border-radius: 10px;
+  background: rgba(255,255,255,0.012);
+  transition: background .18s ease, border-color .18s ease, transform .18s ease;
 }
 [data-testid="stSidebar"] [data-testid="stRadio"] [role="radiogroup"] label:hover {
-  background: rgba(148, 163, 184, 0.08); border-color: rgba(148, 163, 184, 0.16);
+  background: rgba(148, 163, 184, 0.075); border-color: rgba(148, 163, 184, 0.16);
+  transform: translateX(2px);
 }
 [data-testid="stSidebar"] [data-testid="stRadio"] [role="radiogroup"] label:has(input:checked) {
-  background: rgba(56, 189, 248, 0.12); border-color: rgba(56, 189, 248, 0.30);
+  background: linear-gradient(100deg, rgba(0, 212, 255, 0.15), rgba(68, 136, 255, 0.06));
+  border-color: rgba(56, 189, 248, 0.32);
+  box-shadow: inset 3px 0 0 #00D4FF, 0 5px 18px rgba(0, 0, 0, 0.12);
 }
 [data-testid="stSidebar"] [data-testid="stRadio"] [role="radiogroup"] label p { margin: 0; }
 
@@ -333,8 +379,11 @@ div[data-testid="stTabs"] [aria-selected="true"] {
   .kpi-value { font-size: 24px; }
 }
 @media (max-width: 700px) {
-  .app-hero { align-items: flex-start; flex-direction: column; gap: 12px; padding: 18px 16px; }
-  .app-hero-shield { font-size: 26px; }
+  .app-hero { align-items: flex-start; flex-direction: column; gap: 14px; padding: 20px 16px; }
+  .app-hero-brand { gap: 12px; }
+  .app-hero-shield { width: 46px; height: 46px; flex-basis: 46px; font-size: 23px; border-radius: 13px; }
+  .app-hero-title { font-size: clamp(20px, 5vw, 25px); }
+  .app-hero-eyebrow { font-size: 8px; letter-spacing: .15em; }
   .app-hero-status { justify-content: flex-start; }
   .kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
   .kpi-tile { padding: 13px; }
@@ -368,8 +417,9 @@ HERO_HTML = """
   <div class="app-hero-brand">
     <div class="app-hero-shield" aria-hidden="true">🛡️</div>
     <div class="app-hero-copy">
+      <div class="app-hero-eyebrow">ANDROID SECURITY · EVIDENCE FUSION</div>
       <div class="app-hero-title">Android Software Trust</div>
-      <div class="app-hero-subtitle">Source-aware evidence fusion for security risk assessment</div>
+      <div class="app-hero-subtitle">See the signals. Understand the risk. Make evidence-led decisions.</div>
     </div>
   </div>
   <div class="app-hero-status">
