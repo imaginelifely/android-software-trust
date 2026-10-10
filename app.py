@@ -15,7 +15,6 @@ import random
 from typing import Optional, Dict, Any, List
 
 import streamlit as st
-import streamlit.components.v1 as components
 import pandas as pd
 import numpy as np
 import plotly.express as px
@@ -118,7 +117,7 @@ html, body, .stApp, [class*="css"] {
   border-radius: 12px; padding: 20px 22px;
   transition: border-color 0.2s, box-shadow 0.2s;
 }
-.card:hover { border-color: var(--border-hover); box-shadow: 0 4px 24px rgba(0,212,255,0.08); }
+.card:hover { border-color: var(--border-hover); }
 .card-glow { box-shadow: var(--glow-cyan); }
 .card-danger { border-color: rgba(255,58,92,0.35); box-shadow: var(--glow-danger); }
 .card-safe { border-color: rgba(34,197,94,0.35); box-shadow: 0 0 20px rgba(34,197,94,0.15); }
@@ -272,7 +271,7 @@ html, body, .stApp, [class*="css"] {
 }
 .stButton > button:hover {
   background: linear-gradient(135deg, rgba(0,212,255,0.25), rgba(68,136,255,0.25)) !important;
-  box-shadow: var(--glow-cyan) !important; transform: translateY(-1px) !important;
+  box-shadow: 0 2px 10px rgba(0,212,255,0.10) !important; transform: translateY(-1px) !important;
 }
 div[data-testid="stTabs"] [data-baseweb="tab"] {
   font-weight: 600 !important; font-size: 13px !important; color: var(--text-muted) !important;
@@ -281,6 +280,65 @@ div[data-testid="stTabs"] [data-baseweb="tab"] {
 div[data-testid="stTabs"] [aria-selected="true"] {
   color: var(--accent-cyan) !important;
   border-bottom: 2px solid var(--accent-cyan) !important;
+}
+
+/* Responsive application header */
+.app-hero {
+  display: flex; align-items: center; justify-content: space-between; gap: 20px;
+  padding: 22px clamp(16px, 3vw, 36px);
+  min-height: 104px; box-sizing: border-box;
+  background: linear-gradient(135deg, #0A1220 0%, #101C2E 100%);
+  border-bottom: 1px solid rgba(148, 163, 184, 0.16);
+}
+.app-hero-brand { display: flex; align-items: center; gap: 14px; min-width: 0; }
+.app-hero-shield { font-size: 30px; flex: 0 0 auto; }
+.app-hero-copy { min-width: 0; }
+.app-hero-title { color: #F1F5F9; font-size: clamp(18px, 2vw, 24px); font-weight: 750; line-height: 1.2; }
+.app-hero-subtitle { color: #A7B4C8; font-size: 12px; margin-top: 5px; line-height: 1.45; }
+.app-hero-status { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; }
+.status-pill { padding: 5px 10px; border-radius: 999px; font-size: 10px; font-weight: 700;
+  color: #BAE6FD; background: rgba(56, 189, 248, 0.10); border: 1px solid rgba(56, 189, 248, 0.24); }
+.status-pill-muted { color: #CBD5E1; background: rgba(148, 163, 184, 0.08); border-color: rgba(148, 163, 184, 0.18); }
+
+/* Native sidebar radio styled as a clear navigation list */
+[data-testid="stSidebar"] [data-testid="stRadio"] > label { display: none; }
+[data-testid="stSidebar"] [data-testid="stRadio"] [role="radiogroup"] { gap: 4px; }
+[data-testid="stSidebar"] [data-testid="stRadio"] [role="radiogroup"] label {
+  padding: 9px 11px; border: 1px solid transparent; border-radius: 8px;
+  transition: background .15s ease, border-color .15s ease;
+}
+[data-testid="stSidebar"] [data-testid="stRadio"] [role="radiogroup"] label:hover {
+  background: rgba(148, 163, 184, 0.08); border-color: rgba(148, 163, 184, 0.16);
+}
+[data-testid="stSidebar"] [data-testid="stRadio"] [role="radiogroup"] label:has(input:checked) {
+  background: rgba(56, 189, 248, 0.12); border-color: rgba(56, 189, 248, 0.30);
+}
+[data-testid="stSidebar"] [data-testid="stRadio"] [role="radiogroup"] label p { margin: 0; }
+
+/* Responsive layouts */
+@media (max-width: 1100px) {
+  .kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .kpi-value { font-size: 24px; }
+}
+@media (max-width: 700px) {
+  .app-hero { align-items: flex-start; flex-direction: column; gap: 12px; padding: 18px 16px; }
+  .app-hero-shield { font-size: 26px; }
+  .app-hero-status { justify-content: flex-start; }
+  .kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .kpi-tile { padding: 13px; }
+  .kpi-label { font-size: 10px; }
+  .kpi-value { font-size: 21px; overflow-wrap: anywhere; }
+  .card { padding: 16px; }
+  .section-title { font-size: 18px; }
+  .source-name { width: 88px; }
+  .source-pct { width: 42px; }
+  .block-container { padding-left: 0 !important; padding-right: 0 !important; }
+}
+@media (max-width: 420px) {
+  .kpi-grid { grid-template-columns: minmax(0, 1fr); }
+  .app-hero-subtitle { font-size: 11px; }
+  .decision-score { font-size: 30px; }
+  .eq-block { padding: 12px; font-size: 11px; overflow-wrap: anywhere; }
 }
 
 /* Scrollbar */
@@ -294,84 +352,19 @@ st.markdown(GLOBAL_CSS, unsafe_allow_html=True)
 
 # ── Particle / Sand Canvas hero ────────────────────────────────────────────────
 HERO_HTML = """
-<div style="width:100%;height:120px;position:relative;overflow:hidden;
-     background:linear-gradient(135deg,#03050A 0%,#080D16 50%,#0A1225 100%);
-     border-bottom:1px solid rgba(0,212,255,0.13);">
-  <canvas id="heroCanvas" style="position:absolute;inset:0;width:100%;height:100%;"></canvas>
-  <div style="position:absolute;inset:0;display:flex;align-items:center;gap:20px;padding:0 36px;z-index:2;">
-    <div style="font-size:36px;">🛡️</div>
-    <div>
-      <div style="font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:800;
-           color:#E8F0FE;letter-spacing:-0.02em;line-height:1.1;">
-        Android Software Trust
-      </div>
-      <div style="font-size:12px;color:#6B7FA3;font-weight:500;margin-top:4px;
-           font-family:'Inter',sans-serif;letter-spacing:0.03em;">
-        Source-Aware Evidence Fusion &nbsp;·&nbsp; Multi-Source Security Risk Assessment &nbsp;·&nbsp; GL Bajaj ITM
-      </div>
-    </div>
-    <div style="margin-left:auto;display:flex;gap:10px;align-items:center;">
-      <span style="background:rgba(0,212,255,0.12);border:1px solid rgba(0,212,255,0.28);
-            color:#00D4FF;font-size:10px;font-weight:700;padding:4px 12px;border-radius:20px;
-            text-transform:uppercase;letter-spacing:0.08em;">Research Prototype</span>
-      <span style="background:rgba(34,197,94,0.12);border:1px solid rgba(34,197,94,0.30);
-            color:#22C55E;font-size:10px;font-weight:700;padding:4px 12px;border-radius:20px;
-            text-transform:uppercase;letter-spacing:0.08em;">● Live</span>
+<div class="app-hero">
+  <div class="app-hero-brand">
+    <div class="app-hero-shield" aria-hidden="true">🛡️</div>
+    <div class="app-hero-copy">
+      <div class="app-hero-title">Android Software Trust</div>
+      <div class="app-hero-subtitle">Source-aware evidence fusion for security risk assessment</div>
     </div>
   </div>
+  <div class="app-hero-status">
+    <span class="status-pill">Research prototype</span>
+    <span class="status-pill status-pill-muted">Offline assessment demo</span>
+  </div>
 </div>
-<script>
-(function(){
-  const C=document.getElementById('heroCanvas');
-  if(!C)return;
-  const ctx=C.getContext('2d');
-  let W=C.offsetWidth,H=C.offsetHeight;
-  C.width=W;C.height=H;
-  const N=220,pts=[];
-  for(let i=0;i<N;i++){
-    pts.push({
-      x:Math.random()*W, y:Math.random()*H,
-      vx:(Math.random()-.5)*.35, vy:(Math.random()-.5)*.22,
-      r:Math.random()*1.6+.4,
-      alpha:Math.random()*.45+.05,
-      color: Math.random()<.6?'0,212,255':'139,92,246'
-    });
-  }
-  let mx=-999,my=-999;
-  C.addEventListener('mousemove',e=>{
-    const rc=C.getBoundingClientRect();
-    mx=e.clientX-rc.left; my=e.clientY-rc.top;
-  });
-  function frame(){
-    ctx.clearRect(0,0,W,H);
-    pts.forEach(p=>{
-      const dx=p.x-mx,dy=p.y-my,dist=Math.sqrt(dx*dx+dy*dy);
-      if(dist<90){const f=(90-dist)/90*1.2;p.vx+=dx/dist*f*.08;p.vy+=dy/dist*f*.08;}
-      p.vx*=.97;p.vy*=.97;
-      p.x+=p.vx;p.y+=p.vy;
-      if(p.x<0)p.x=W; if(p.x>W)p.x=0;
-      if(p.y<0)p.y=H; if(p.y>H)p.y=0;
-      // connect lines
-      pts.forEach(q=>{
-        if(q===p)return;
-        const ddx=p.x-q.x,ddy=p.y-q.y,d=Math.sqrt(ddx*ddx+ddy*ddy);
-        if(d<80){
-          ctx.beginPath();
-          ctx.strokeStyle=`rgba(${p.color},${(1-d/80)*.08})`;
-          ctx.lineWidth=.5;
-          ctx.moveTo(p.x,p.y);ctx.lineTo(q.x,q.y);ctx.stroke();
-        }
-      });
-      ctx.beginPath();
-      ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
-      ctx.fillStyle=`rgba(${p.color},${p.alpha})`;
-      ctx.fill();
-    });
-    requestAnimationFrame(frame);
-  }
-  frame();
-})();
-</script>
 """
 
 # ── Session state ──────────────────────────────────────────────────────────────
@@ -429,11 +422,19 @@ with st.sidebar:
            letter-spacing:0.1em;margin-bottom:14px;">Navigation</div>
     """, unsafe_allow_html=True)
 
-    for key, icon, label in NAV_ITEMS:
-        active = "active" if st.session_state.page == key else ""
-        if st.button(f"{icon}  {label}", key=f"nav_{key}", use_container_width=True):
-            st.session_state.page = key
-            st.rerun()
+    nav_keys = [key for key, _, _ in NAV_ITEMS]
+    nav_labels = {key: f"{icon}  {label}" for key, icon, label in NAV_ITEMS}
+    if "page_navigation" not in st.session_state:
+        st.session_state.page_navigation = st.session_state.page
+
+    st.radio(
+        "Navigation",
+        options=nav_keys,
+        format_func=lambda key: nav_labels[key],
+        key="page_navigation",
+        label_visibility="collapsed",
+    )
+    st.session_state.page = st.session_state.page_navigation
 
     st.markdown("</div>", unsafe_allow_html=True)
     st.markdown("---")
@@ -475,7 +476,7 @@ with st.sidebar:
     """, unsafe_allow_html=True)
 
 # ── Hero ───────────────────────────────────────────────────────────────────────
-components.html(HERO_HTML, height=122, scrolling=False)
+st.markdown(HERO_HTML, unsafe_allow_html=True)
 
 page = st.session_state.page
 cfg  = st.session_state.config
@@ -485,7 +486,7 @@ cfg  = st.session_state.config
 # ─────────────────────────────────────────────────────────────────────────────
 if page == "overview":
     st.markdown("""
-    <div style="padding:28px 36px 0;">
+    <div style="padding:24px clamp(16px, 3vw, 36px) 0;">
       <div class="section-header">
         <div class="section-title">System Overview</div>
         <div class="section-badge">Research Prototype</div>
@@ -494,7 +495,7 @@ if page == "overview":
     """, unsafe_allow_html=True)
 
     with st.container():
-        st.markdown('<div style="padding:0 36px;">', unsafe_allow_html=True)
+        st.markdown('<div style="padding:0 clamp(16px, 3vw, 36px);">', unsafe_allow_html=True)
 
         # KPI row
         st.markdown("""
@@ -524,7 +525,7 @@ if page == "overview":
 
         st.markdown("</div>", unsafe_allow_html=True)
 
-    st.markdown('<div style="padding:0 36px;">', unsafe_allow_html=True)
+    st.markdown('<div style="padding:0 clamp(16px, 3vw, 36px);">', unsafe_allow_html=True)
     col1, col2 = st.columns([3, 2], gap="large")
 
     with col1:
@@ -694,7 +695,7 @@ if page == "overview":
 # ─────────────────────────────────────────────────────────────────────────────
 elif page == "calculator":
     st.markdown("""
-    <div style="padding:28px 36px 0;">
+    <div style="padding:24px clamp(16px, 3vw, 36px) 0;">
       <div class="section-header">
         <div class="section-title">Evidence Fusion Calculator</div>
         <div class="section-badge">Interactive</div>
@@ -706,7 +707,7 @@ elif page == "calculator":
     </div>
     """, unsafe_allow_html=True)
 
-    st.markdown('<div style="padding:0 36px;">', unsafe_allow_html=True)
+    st.markdown('<div style="padding:0 clamp(16px, 3vw, 36px);">', unsafe_allow_html=True)
     col_in, col_out = st.columns([1, 1], gap="large")
 
     with col_in:
@@ -921,7 +922,7 @@ elif page == "calculator":
 # ─────────────────────────────────────────────────────────────────────────────
 elif page == "evidence":
     st.markdown("""
-    <div style="padding:28px 36px 0;">
+    <div style="padding:24px clamp(16px, 3vw, 36px) 0;">
       <div class="section-header">
         <div class="section-title">Evidence Sources</div>
         <div class="section-badge">Dataset Audit</div>
@@ -929,7 +930,7 @@ elif page == "evidence":
     </div>
     """, unsafe_allow_html=True)
 
-    st.markdown('<div style="padding:0 36px;">', unsafe_allow_html=True)
+    st.markdown('<div style="padding:0 clamp(16px, 3vw, 36px);">', unsafe_allow_html=True)
 
     SRC_COLORS = {"Static / DREBIN": CYAN, "Behavioural / CICMalDroid": VIOLET, "Network / CIC-AndMal": LIME}
     SRC_ICONS  = {"Static / DREBIN": "📋", "Behavioural / CICMalDroid": "🧬", "Network / CIC-AndMal": "🌐"}
@@ -1029,7 +1030,7 @@ elif page == "evidence":
 # ─────────────────────────────────────────────────────────────────────────────
 elif page == "experiments":
     st.markdown("""
-    <div style="padding:28px 36px 0;">
+    <div style="padding:24px clamp(16px, 3vw, 36px) 0;">
       <div class="section-header">
         <div class="section-title">Research Experiments</div>
         <div class="section-badge">Ablation Studies</div>
@@ -1037,7 +1038,7 @@ elif page == "experiments":
     </div>
     """, unsafe_allow_html=True)
 
-    st.markdown('<div style="padding:0 36px;">', unsafe_allow_html=True)
+    st.markdown('<div style="padding:0 clamp(16px, 3vw, 36px);">', unsafe_allow_html=True)
 
     tab1, tab2, tab3, tab4, tab5 = st.tabs([
         "📈  Fig 1 — Fusion Gain",
@@ -1376,7 +1377,7 @@ elif page == "experiments":
 # ─────────────────────────────────────────────────────────────────────────────
 elif page == "config":
     st.markdown("""
-    <div style="padding:28px 36px 0;">
+    <div style="padding:24px clamp(16px, 3vw, 36px) 0;">
       <div class="section-header">
         <div class="section-title">Configuration</div>
         <div class="section-badge">Weights & Thresholds</div>
@@ -1388,7 +1389,7 @@ elif page == "config":
     </div>
     """, unsafe_allow_html=True)
 
-    st.markdown('<div style="padding:0 36px;">', unsafe_allow_html=True)
+    st.markdown('<div style="padding:0 clamp(16px, 3vw, 36px);">', unsafe_allow_html=True)
     col_cfg1, col_cfg2 = st.columns([1, 1], gap="large")
 
     with col_cfg1:
@@ -1507,7 +1508,7 @@ elif page == "config":
 # ─────────────────────────────────────────────────────────────────────────────
 elif page == "history":
     st.markdown("""
-    <div style="padding:28px 36px 0;">
+    <div style="padding:24px clamp(16px, 3vw, 36px) 0;">
       <div class="section-header">
         <div class="section-title">Assessment History</div>
         <div class="section-badge">Local Session</div>
@@ -1515,7 +1516,7 @@ elif page == "history":
     </div>
     """, unsafe_allow_html=True)
 
-    st.markdown('<div style="padding:0 36px;">', unsafe_allow_html=True)
+    st.markdown('<div style="padding:0 clamp(16px, 3vw, 36px);">', unsafe_allow_html=True)
     history: AssessmentHistory = st.session_state.history
 
     h_col1, h_col2, h_col3 = st.columns(3, gap="small")
@@ -1592,7 +1593,7 @@ elif page == "history":
 # ─────────────────────────────────────────────────────────────────────────────
 elif page == "about":
     st.markdown("""
-    <div style="padding:28px 36px 0;">
+    <div style="padding:24px clamp(16px, 3vw, 36px) 0;">
       <div class="section-header">
         <div class="section-title">About & Limitations</div>
         <div class="section-badge">Transparency</div>
@@ -1600,7 +1601,7 @@ elif page == "about":
     </div>
     """, unsafe_allow_html=True)
 
-    st.markdown('<div style="padding:0 36px;">', unsafe_allow_html=True)
+    st.markdown('<div style="padding:0 clamp(16px, 3vw, 36px);">', unsafe_allow_html=True)
 
     col_a1, col_a2 = st.columns([3, 2], gap="large")
     with col_a1:
@@ -1709,7 +1710,7 @@ elif page == "about":
 
 # ── Footer ─────────────────────────────────────────────────────────────────────
 st.markdown("""
-<div style="margin:40px 36px 20px;padding:16px 20px;background:var(--bg-panel);
+<div style="margin:32px clamp(16px, 3vw, 36px) 20px;padding:16px 20px;background:var(--bg-panel);
      border:1px solid var(--border);border-radius:10px;
      display:flex;justify-content:space-between;align-items:center;font-size:11px;color:#3A4A6B;">
   <div>
