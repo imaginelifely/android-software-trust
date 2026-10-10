@@ -987,12 +987,15 @@ elif page == "playground":
                 marker_color=[VIOLET, LIME], text=[f"{v:.3f}" for v in compare_df["Trust score"]],
                 textposition="outside",
             ))
-            fig_lab.update_layout(
-                **PLOTLY_LAYOUT, barmode="group", height=300,
+            lab_chart_layout = dict(PLOTLY_LAYOUT)
+            lab_chart_layout.update(
+                barmode="group",
+                height=300,
                 yaxis=dict(range=[0, 1.12], title="Score (0–1)", gridcolor="rgba(255,255,255,0.05)"),
                 legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="left", x=0),
                 margin=dict(l=12, r=12, t=45, b=12),
             )
+            fig_lab.update_layout(**lab_chart_layout)
             st.plotly_chart(fig_lab, use_container_width=True)
             st.markdown(
                 '<div style="font-size:12px;color:#8EA2C5;line-height:1.65;">'
