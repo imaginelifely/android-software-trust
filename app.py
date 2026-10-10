@@ -799,9 +799,9 @@ elif page == "playground":
             st.session_state["lab_weight_network"] = 0.20
     with scene_col3:
         if st.button("⚡ Conflicting", use_container_width=True, key="lab_scene_conflict"):
-            st.session_state["lab_static"] = 0.12
-            st.session_state["lab_behaviour"] = 0.88
-            st.session_state["lab_network"] = 0.91
+            st.session_state["lab_static"] = 0.08
+            st.session_state["lab_behaviour"] = 0.92
+            st.session_state["lab_network"] = 0.12
             st.session_state["lab_use_static"] = True
             st.session_state["lab_use_behaviour"] = True
             st.session_state["lab_use_network"] = True
