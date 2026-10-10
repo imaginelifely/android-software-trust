@@ -439,13 +439,41 @@ if "page" not in st.session_state:
 if "last_result" not in st.session_state:
     st.session_state.last_result = None
 
+if "light_mode" not in st.session_state:
+    st.session_state.light_mode = False
+
+LIGHT_THEME_CSS = """<style>
+:root { --bg-void:#F5F7FC; --bg-panel:#FFFFFF; --bg-card:#FFFFFF; --bg-raised:#EEF2FA; --border:rgba(100,116,139,.22); --border-hover:rgba(124,58,237,.48); --text-prime:#172033; --text-muted:#586780; --text-dim:#78849A; --accent-cyan:#6D28D9; --accent-blue:#4F46E5; --accent-violet:#9333EA; --accent-lime:#15803D; --glow-cyan:0 8px 24px rgba(109,40,217,.08); --glow-violet:0 8px 24px rgba(147,51,234,.10); }
+html, body, .stApp, [class*="css"] { background-color:#F5F7FC !important; color:#172033 !important; }
+[data-testid="stSidebar"] { background:#FFFFFF !important; border-right:1px solid #E2E8F0 !important; box-shadow:8px 0 28px rgba(15,23,42,.035); }
+[data-testid="stSidebar"] * { color:#26334A !important; }
+.app-hero { background:radial-gradient(ellipse at 82% 0%,rgba(139,92,246,.16),transparent 36%),radial-gradient(ellipse at 8% 110%,rgba(79,70,229,.09),transparent 42%),linear-gradient(120deg,#FFFFFF 0%,#F5F3FF 55%,#EEF2FF 100%) !important; border-bottom-color:#E2E8F0 !important; box-shadow:0 12px 34px rgba(30,41,59,.06) !important; }
+.app-hero-title { color:#172033 !important; text-shadow:none !important; } .app-hero-subtitle { color:#586780 !important; } .app-hero-eyebrow { color:#6D28D9 !important; }
+.app-hero-shield { background:linear-gradient(145deg,rgba(124,58,237,.12),rgba(79,70,229,.06)) !important; border-color:rgba(124,58,237,.22) !important; box-shadow:0 0 24px rgba(124,58,237,.08) !important; }
+.status-pill { color:#5B21B6 !important; background:rgba(124,58,237,.08) !important; border-color:rgba(124,58,237,.20) !important; } .status-pill-muted { color:#475569 !important; background:rgba(100,116,139,.07) !important; border-color:rgba(100,116,139,.18) !important; }
+.card,.kpi-tile { background:linear-gradient(145deg,#FFFFFF,#FAFBFF) !important; border-color:#E1E7F0 !important; box-shadow:0 8px 24px rgba(15,23,42,.045) !important; } .card:hover,.kpi-tile:hover { border-color:rgba(124,58,237,.38) !important; box-shadow:0 14px 30px rgba(79,70,229,.09) !important; }
+.section-title { color:#172033 !important; } .section-header { border-bottom-color:#E2E8F0 !important; }
+.styled-table th { background:#EEF2FA !important; color:#586780 !important; } .styled-table td { border-bottom-color:#E2E8F0 !important; color:#26334A; } .styled-table tr:hover td { background:rgba(124,58,237,.045) !important; }
+.eq-block { background:#F0EDFF !important; color:#5B21B6 !important; border-color:#DDD6FE !important; border-left-color:#7C3AED !important; }
+.alert-info { background:#EEF2FF !important; border-color:#C7D2FE !important; color:#26334A !important; } .alert-warn { background:#FFFBEB !important; border-color:#FDE68A !important; color:#92400E !important; }
+.decision-trusted,.decision-review,.decision-highrisk { color:#172033 !important; }
+.stButton > button { background:linear-gradient(135deg,rgba(124,58,237,.10),rgba(79,70,229,.08)) !important; border-color:rgba(124,58,237,.30) !important; color:#6D28D9 !important; } .stButton > button:hover { background:linear-gradient(135deg,rgba(124,58,237,.16),rgba(79,70,229,.12)) !important; box-shadow:0 4px 14px rgba(124,58,237,.10) !important; }
+div[data-testid="stTabs"] [data-baseweb="tab"] { color:#64748B !important; } div[data-testid="stTabs"] [aria-selected="true"] { color:#6D28D9 !important; border-bottom-color:#7C3AED !important; }
+[data-testid="stNumberInput"] input,[data-testid="stTextInput"] input,[data-testid="stSelectbox"] > div { background:#FFFFFF !important; color:#172033 !important; border-color:#D7DEEA !important; }
+[data-testid="stRadio"] label p,[data-testid="stCheckbox"] label p,[data-testid="stToggle"] label p { color:#26334A !important; }
+[data-testid="stSidebar"] [data-testid="stRadio"] [role="radiogroup"] label:has(input:checked) { background:linear-gradient(100deg,rgba(124,58,237,.12),rgba(79,70,229,.05)) !important; border-color:rgba(124,58,237,.28) !important; box-shadow:inset 3px 0 0 #7C3AED,0 5px 18px rgba(15,23,42,.04) !important; }
+::-webkit-scrollbar-track { background:#F5F7FC !important; } ::-webkit-scrollbar-thumb { background:#CBD5E1 !important; }
+</style>"""
+if st.session_state.light_mode:
+    st.markdown(LIGHT_THEME_CSS, unsafe_allow_html=True)
+
 # ── Plotly theme helper ────────────────────────────────────────────────────────
 PLOTLY_LAYOUT = dict(
     paper_bgcolor="rgba(0,0,0,0)",
     plot_bgcolor="rgba(0,0,0,0)",
-    font=dict(family="Inter, JetBrains Mono, sans-serif", color="#E8F0FE", size=12),
-    xaxis=dict(gridcolor="rgba(255,255,255,0.05)", zerolinecolor="rgba(255,255,255,0.05)"),
-    yaxis=dict(gridcolor="rgba(255,255,255,0.05)", zerolinecolor="rgba(255,255,255,0.05)"),
+    font=dict(family="Inter, JetBrains Mono, sans-serif", color=("#172033" if st.session_state.light_mode else "#E8F0FE"), size=12),
+    xaxis=dict(gridcolor=("rgba(100,116,139,0.18)" if st.session_state.light_mode else "rgba(255,255,255,0.05)"), zerolinecolor=("rgba(100,116,139,0.18)" if st.session_state.light_mode else "rgba(255,255,255,0.05)")),
+    yaxis=dict(gridcolor=("rgba(100,116,139,0.18)" if st.session_state.light_mode else "rgba(255,255,255,0.05)"), zerolinecolor=("rgba(100,116,139,0.18)" if st.session_state.light_mode else "rgba(255,255,255,0.05)")),
     margin=dict(l=10, r=10, t=36, b=10),
     legend=dict(bgcolor="rgba(0,0,0,0)", font=dict(size=11)),
 )
@@ -453,7 +481,7 @@ PLOTLY_LAYOUT = dict(
 def apply_theme(fig, title=""):
     layout = dict(PLOTLY_LAYOUT)
     if title:
-        layout["title"] = dict(text=title, font=dict(size=14, color="#E8F0FE"), x=0, xanchor="left")
+        layout["title"] = dict(text=title, font=dict(size=14, color=("#172033" if st.session_state.light_mode else "#E8F0FE")), x=0, xanchor="left")
     fig.update_layout(**layout)
     return fig
 
@@ -500,6 +528,11 @@ with st.sidebar:
     st.session_state.page = st.session_state.page_navigation
 
     st.markdown("</div>", unsafe_allow_html=True)
+    st.markdown("---")
+
+    st.markdown("### Appearance")
+    st.toggle("Light mode", key="light_mode", help="Switch between the default dark interface and a light theme.")
+    st.caption("Theme applies across the dashboard.")
     st.markdown("---")
 
     # Config summary
