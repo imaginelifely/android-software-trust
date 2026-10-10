@@ -88,13 +88,25 @@ html, body, .stApp, [class*="css"] {
 .block-container { padding: 0 !important; max-width: 100% !important; }
 
 /* ─── Sidebar ────────────────────────── */
+/* Keep the navigation panel visible and expanded on desktop/local runs. */
 [data-testid="stSidebar"] {
   background: var(--bg-panel) !important;
   border-right: 1px solid var(--border) !important;
+  width: 260px !important;
   min-width: 260px !important;
   max-width: 260px !important;
+  flex: 0 0 260px !important;
+  transform: none !important;
+  visibility: visible !important;
+  opacity: 1 !important;
 }
 [data-testid="stSidebar"] * { color: var(--text-prime) !important; }
+/* Preserve Streamlit's reopen control if the sidebar was collapsed earlier. */
+[data-testid="stSidebarCollapsedControl"] {
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
 
 /* ─── Sidebar nav button ─────────────── */
 .nav-btn {
