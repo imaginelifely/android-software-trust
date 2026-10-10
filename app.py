@@ -469,6 +469,7 @@ WHITE = "#E8F0FE"
 # ── Sidebar ────────────────────────────────────────────────────────────────────
 NAV_ITEMS = [
     ("overview",    "🏠", "Overview"),
+    ("playground",  "🧪", "Fusion Playground"),
     ("calculator",  "⚡", "Risk Calculator"),
     ("evidence",    "🔬", "Evidence Sources"),
     ("experiments", "📊", "Experiments"),
@@ -749,6 +750,256 @@ if page == "overview":
             """, unsafe_allow_html=True)
 
         st.markdown("</div></div>", unsafe_allow_html=True)
+
+    st.markdown("</div>", unsafe_allow_html=True)
+
+# ─────────────────────────────────────────────────────────────────────────────
+# PAGE: FUSION PLAYGROUND
+# ─────────────────────────────────────────────────────────────────────────────
+elif page == "playground":
+    st.markdown("""
+    <div style="padding:24px clamp(16px, 3vw, 36px) 0;">
+      <div class="section-header">
+        <div>
+          <div class="section-title">Fusion Playground</div>
+          <div style="font-size:12px;color:#8EA2C5;margin-top:6px;">Change the signals. Watch the decision respond.</div>
+        </div>
+        <div class="section-badge">INTERACTIVE LAB</div>
+      </div>
+      <div class="alert-info" style="margin-bottom:18px;">
+        🧪 This is a hands-on sandbox for understanding how evidence, source importance, disagreement,
+        and missing signals affect a result. The numbers are illustrative inputs—not a live APK scan.
+      </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # Scenario buttons set widget state before the controls are created.
+    scene_col1, scene_col2, scene_col3, scene_col4 = st.columns(4, gap="small")
+    with scene_col1:
+        if st.button("🌤️ Low concern", use_container_width=True, key="lab_scene_low"):
+            st.session_state["lab_static"] = 0.12
+            st.session_state["lab_behaviour"] = 0.18
+            st.session_state["lab_network"] = 0.15
+            st.session_state["lab_use_static"] = True
+            st.session_state["lab_use_behaviour"] = True
+            st.session_state["lab_use_network"] = True
+            st.session_state["lab_weight_static"] = 0.20
+            st.session_state["lab_weight_behaviour"] = 0.60
+            st.session_state["lab_weight_network"] = 0.20
+    with scene_col2:
+        if st.button("🧩 Mixed signals", use_container_width=True, key="lab_scene_mixed"):
+            st.session_state["lab_static"] = 0.28
+            st.session_state["lab_behaviour"] = 0.72
+            st.session_state["lab_network"] = 0.43
+            st.session_state["lab_use_static"] = True
+            st.session_state["lab_use_behaviour"] = True
+            st.session_state["lab_use_network"] = True
+            st.session_state["lab_weight_static"] = 0.20
+            st.session_state["lab_weight_behaviour"] = 0.60
+            st.session_state["lab_weight_network"] = 0.20
+    with scene_col3:
+        if st.button("⚡ Conflicting", use_container_width=True, key="lab_scene_conflict"):
+            st.session_state["lab_static"] = 0.12
+            st.session_state["lab_behaviour"] = 0.88
+            st.session_state["lab_network"] = 0.91
+            st.session_state["lab_use_static"] = True
+            st.session_state["lab_use_behaviour"] = True
+            st.session_state["lab_use_network"] = True
+            st.session_state["lab_weight_static"] = 0.20
+            st.session_state["lab_weight_behaviour"] = 0.60
+            st.session_state["lab_weight_network"] = 0.20
+    with scene_col4:
+        if st.button("🔄 Reset lab", use_container_width=True, key="lab_scene_reset"):
+            st.session_state["lab_static"] = 0.25
+            st.session_state["lab_behaviour"] = 0.72
+            st.session_state["lab_network"] = 0.80
+            st.session_state["lab_use_static"] = True
+            st.session_state["lab_use_behaviour"] = True
+            st.session_state["lab_use_network"] = True
+            st.session_state["lab_weight_static"] = 0.20
+            st.session_state["lab_weight_behaviour"] = 0.60
+            st.session_state["lab_weight_network"] = 0.20
+
+    st.markdown('<div style="padding:0 clamp(16px, 3vw, 36px);">', unsafe_allow_html=True)
+    lab_inputs, lab_results = st.columns([0.95, 1.25], gap="large")
+
+    with lab_inputs:
+        st.markdown('<div class="card">', unsafe_allow_html=True)
+        st.markdown("""
+        <div style="font-size:15px;font-weight:800;color:#F1F5F9;margin-bottom:4px;">01 / Evidence signals</div>
+        <div style="font-size:12px;color:#8EA2C5;margin-bottom:14px;">Move the sliders and see the math update instantly.</div>
+        """, unsafe_allow_html=True)
+
+        lab_use_static = st.checkbox("📋 Static evidence", value=True, key="lab_use_static")
+        lab_static = st.slider("Static suspiciousness", 0.0, 1.0, 0.25, 0.01, key="lab_static",
+                               disabled=not lab_use_static, help="A value closer to 1 means this source sees stronger suspicious signals.")
+        st.markdown("<div style='height:4px;border-top:1px solid rgba(255,255,255,.06);margin:8px 0;'></div>", unsafe_allow_html=True)
+
+        lab_use_behaviour = st.checkbox("🧬 Behavioural evidence", value=True, key="lab_use_behaviour")
+        lab_behaviour = st.slider("Behavioural suspiciousness", 0.0, 1.0, 0.72, 0.01, key="lab_behaviour",
+                                  disabled=not lab_use_behaviour, help="Illustrates signals observed during application behaviour.")
+        st.markdown("<div style='height:4px;border-top:1px solid rgba(255,255,255,.06);margin:8px 0;'></div>", unsafe_allow_html=True)
+
+        lab_use_network = st.checkbox("🌐 Network evidence", value=True, key="lab_use_network")
+        lab_network = st.slider("Network suspiciousness", 0.0, 1.0, 0.80, 0.01, key="lab_network",
+                                disabled=not lab_use_network, help="Illustrates suspiciousness inferred from communication patterns.")
+
+        st.markdown("""
+        <div style="margin:18px 0 8px;border-top:1px solid rgba(255,255,255,.07);"></div>
+        <div style="font-size:15px;font-weight:800;color:#F1F5F9;margin-bottom:4px;">02 / What matters most?</div>
+        <div style="font-size:12px;color:#8EA2C5;margin-bottom:10px;">Set source importance. The values are automatically normalised to total 100%.</div>
+        """, unsafe_allow_html=True)
+
+        raw_ws = st.slider("Static importance", 0.0, 1.0, 0.20, 0.05, key="lab_weight_static")
+        raw_wb = st.slider("Behavioural importance", 0.0, 1.0, 0.60, 0.05, key="lab_weight_behaviour")
+        raw_wn = st.slider("Network importance", 0.0, 1.0, 0.20, 0.05, key="lab_weight_network")
+        raw_total = raw_ws + raw_wb + raw_wn
+        if raw_total <= 0:
+            weights = (1/3, 1/3, 1/3)
+            st.info("All importance sliders are zero, so equal weights are used until you increase one.")
+        else:
+            weights = (raw_ws / raw_total, raw_wb / raw_total, raw_wn / raw_total)
+
+        st.markdown(
+            f'<div class="alert-info" style="font-size:12px;margin-top:8px;">'
+            f'<b>Effective importance</b><br>Static {weights[0]:.0%} · Behavioural {weights[1]:.0%} · Network {weights[2]:.0%}'
+            f'</div>', unsafe_allow_html=True)
+        st.markdown("</div>", unsafe_allow_html=True)
+
+    # A local configuration keeps the playground separate from the saved application settings.
+    lab_cfg = FusionConfig(
+        static_weight=weights[0],
+        behaviour_weight=weights[1],
+        network_weight=weights[2],
+        decision_basis="trust",
+        scale_trust_by_coverage=True,
+    )
+    lab_result = fuse_evidence(
+        static_prob=lab_static if lab_use_static else None,
+        behaviour_prob=lab_behaviour if lab_use_behaviour else None,
+        network_prob=lab_network if lab_use_network else None,
+        config=lab_cfg,
+    )
+
+    with lab_results:
+        if not lab_result.has_evidence:
+            st.warning("Turn on at least one evidence source to calculate a result.")
+        else:
+            lab_decision = lab_result.trust_decision
+            lab_decision_style = {
+                "Trusted": ("decision-trusted", "#22C55E", "✓"),
+                "Review": ("decision-review", "#F59E0B", "⚠"),
+                "High Risk": ("decision-highrisk", "#FF3A5C", "!"),
+            }
+            dec_class, dec_color, dec_icon = lab_decision_style[lab_decision]
+            st.markdown(f"""
+            <div class="{dec_class}" style="margin-bottom:12px;position:relative;overflow:hidden;">
+              <div style="font-size:10px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:#8EA2C5;">LIVE RESULT</div>
+              <div class="decision-emoji">{dec_icon}</div>
+              <div class="decision-label" style="color:{dec_color};">{lab_decision}</div>
+              <div style="font-size:12px;color:#A7B4C8;margin-top:6px;">Trust score {lab_result.trust:.1%} · Fused risk {lab_result.risk:.1%}</div>
+            </div>
+            """, unsafe_allow_html=True)
+
+            lab_m1, lab_m2, lab_m3 = st.columns(3, gap="small")
+            with lab_m1:
+                st.metric("Fused risk", f"{lab_result.risk:.3f}", help="Weighted average of the available source risk values.")
+            with lab_m2:
+                st.metric("Disagreement", f"{lab_result.disagreement:.3f}", help="Weighted spread between source values and the fused result.")
+            with lab_m3:
+                st.metric("Coverage", f"{lab_result.coverage:.0%}", help="Sum of the original importance assigned to sources that are available.")
+
+            st.markdown('<div class="card" style="margin-top:12px;">', unsafe_allow_html=True)
+            st.markdown('<div style="font-size:15px;font-weight:800;color:#F1F5F9;margin-bottom:4px;">03 / Watch the calculation</div>', unsafe_allow_html=True)
+            st.markdown('<div style="font-size:12px;color:#8EA2C5;margin-bottom:14px;">Every number below is calculated from the controls on the left.</div>', unsafe_allow_html=True)
+
+            active_rows = [
+                ("Static", lab_static, weights[0], lab_use_static, CYAN),
+                ("Behavioural", lab_behaviour, weights[1], lab_use_behaviour, VIOLET),
+                ("Network", lab_network, weights[2], lab_use_network, LIME),
+            ]
+            active_rows = [row for row in active_rows if row[3]]
+            active_weight_total = sum(row[2] for row in active_rows)
+            st.markdown("**Step A — Renormalise available evidence**")
+            st.caption("Disabled sources are excluded; the remaining importance values are scaled back to 100%.")
+            eff_weights = {}
+            for src, risk_val, base_weight, _, color in active_rows:
+                eff = base_weight / active_weight_total if active_weight_total > 0 else 1 / len(active_rows)
+                eff_weights[src] = eff
+                st.markdown(
+                    f'<div class="source-row"><div class="source-name">{src}</div>'
+                    f'<div class="source-bar-wrap"><div class="progress-bar-wrap"><div class="progress-bar-fill" '
+                    f'style="width:{eff*100:.2f}%;background:{color};"></div></div></div>'
+                    f'<div class="source-pct" style="color:{color};">{eff:.1%}</div></div>',
+                    unsafe_allow_html=True)
+            risk_terms = " + ".join([f"({eff_weights[src]:.3f} × {risk_val:.2f})" for src, risk_val, _, _, _ in active_rows])
+            st.markdown("**Step B — Combine the available signals**")
+            st.markdown(
+                f'<div class="eq-block">R = {risk_terms} = <b>{lab_result.risk:.4f}</b></div>',
+                unsafe_allow_html=True)
+            st.markdown("**Step C — Measure source disagreement**")
+            disagree_terms = " + ".join([
+                f"({eff_weights[src]:.3f} × ({risk_val:.2f} − {lab_result.risk:.3f})²)"
+                for src, risk_val, _, _, _ in active_rows
+            ])
+            st.markdown(
+                f'<div class="eq-block">D = {disagree_terms} = <b>{lab_result.disagreement:.4f}</b></div>',
+                unsafe_allow_html=True)
+            st.markdown("**Step D — Combine risk, consistency and coverage**")
+            coverage_factor = math.sqrt(lab_result.coverage)
+            st.markdown(
+                f'<div class="eq-block" style="font-size:12px;overflow-wrap:anywhere;">'
+                f'T = (1 − {lab_result.risk:.4f}) × (1 − {lab_result.disagreement:.4f}) × √{lab_result.coverage:.3f}'
+                f'<br><span style="color:#8EA2C5;font-size:11px;">'
+                f'{(1-lab_result.risk):.4f} × {(1-lab_result.disagreement):.4f} × {coverage_factor:.4f}'
+                f'</span><br><b>= {lab_result.trust:.4f}</b></div>',
+                unsafe_allow_html=True)
+
+            st.markdown("</div>", unsafe_allow_html=True)
+
+            # Compare what changes when the user switches between the two most instructive weighting patterns.
+            st.markdown('<div class="card" style="margin-top:12px;">', unsafe_allow_html=True)
+            st.markdown('<div style="font-size:15px;font-weight:800;color:#F1F5F9;margin-bottom:4px;">04 / Why source importance matters</div>', unsafe_allow_html=True)
+            st.caption("Keep the same signals and compare the current setup with equal importance.")
+            equal_cfg = FusionConfig(
+                static_weight=1/3, behaviour_weight=1/3, network_weight=1/3,
+                decision_basis="trust", scale_trust_by_coverage=True,
+            )
+            equal_result = fuse_evidence(
+                static_prob=lab_static if lab_use_static else None,
+                behaviour_prob=lab_behaviour if lab_use_behaviour else None,
+                network_prob=lab_network if lab_use_network else None,
+                config=equal_cfg,
+            )
+            compare_df = pd.DataFrame({
+                "Setup": ["Your setup", "Equal importance"],
+                "Fused risk": [lab_result.risk, equal_result.risk],
+                "Trust score": [lab_result.trust, equal_result.trust],
+            })
+            fig_lab = go.Figure()
+            fig_lab.add_trace(go.Bar(
+                x=compare_df["Setup"], y=compare_df["Fused risk"], name="Fused risk",
+                marker_color=[CYAN, BLUE], text=[f"{v:.3f}" for v in compare_df["Fused risk"]],
+                textposition="outside",
+            ))
+            fig_lab.add_trace(go.Bar(
+                x=compare_df["Setup"], y=compare_df["Trust score"], name="Trust score",
+                marker_color=[VIOLET, LIME], text=[f"{v:.3f}" for v in compare_df["Trust score"]],
+                textposition="outside",
+            ))
+            fig_lab.update_layout(
+                **PLOTLY_LAYOUT, barmode="group", height=300,
+                yaxis=dict(range=[0, 1.12], title="Score (0–1)", gridcolor="rgba(255,255,255,0.05)"),
+                legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="left", x=0),
+                margin=dict(l=12, r=12, t=45, b=12),
+            )
+            st.plotly_chart(fig_lab, use_container_width=True)
+            st.markdown(
+                '<div style="font-size:12px;color:#8EA2C5;line-height:1.65;">'
+                'Try disabling a source, making two sources disagree, or moving importance toward a weaker signal. '
+                'Notice that a lower fused risk does not automatically mean stronger trust: disagreement and missing evidence also matter.'
+                '</div>', unsafe_allow_html=True)
+            st.markdown("</div>", unsafe_allow_html=True)
 
     st.markdown("</div>", unsafe_allow_html=True)
 
