@@ -15,7 +15,6 @@ import random
 from typing import Optional, Dict, Any, List
 
 import streamlit as st
-import streamlit.components.v1 as components
 import pandas as pd
 import numpy as np
 import plotly.express as px
@@ -89,13 +88,25 @@ html, body, .stApp, [class*="css"] {
 .block-container { padding: 0 !important; max-width: 100% !important; }
 
 /* ─── Sidebar ────────────────────────── */
+/* Keep the navigation panel visible and expanded on desktop/local runs. */
 [data-testid="stSidebar"] {
   background: var(--bg-panel) !important;
   border-right: 1px solid var(--border) !important;
+  width: 260px !important;
   min-width: 260px !important;
   max-width: 260px !important;
+  flex: 0 0 260px !important;
+  transform: none !important;
+  visibility: visible !important;
+  opacity: 1 !important;
 }
 [data-testid="stSidebar"] * { color: var(--text-prime) !important; }
+/* Preserve Streamlit's reopen control if the sidebar was collapsed earlier. */
+[data-testid="stSidebarCollapsedControl"] {
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
 
 /* ─── Sidebar nav button ─────────────── */
 .nav-btn {
@@ -114,11 +125,17 @@ html, body, .stApp, [class*="css"] {
 
 /* ─── Cards ──────────────────────────── */
 .card {
-  background: var(--bg-card); border: 1px solid var(--border);
-  border-radius: 12px; padding: 20px 22px;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  background: linear-gradient(145deg, rgba(15, 25, 42, 0.98), rgba(8, 13, 22, 0.98));
+  border: 1px solid var(--border);
+  border-radius: 16px; padding: 22px;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.12);
+  transition: border-color 0.22s ease, box-shadow 0.22s ease, transform 0.22s ease;
 }
-.card:hover { border-color: var(--border-hover); box-shadow: 0 4px 24px rgba(0,212,255,0.08); }
+.card:hover {
+  border-color: var(--border-hover);
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.20), 0 0 22px rgba(0, 212, 255, 0.045);
+  transform: translateY(-2px);
+}
 .card-glow { box-shadow: var(--glow-cyan); }
 .card-danger { border-color: rgba(255,58,92,0.35); box-shadow: var(--glow-danger); }
 .card-safe { border-color: rgba(34,197,94,0.35); box-shadow: 0 0 20px rgba(34,197,94,0.15); }
@@ -127,12 +144,25 @@ html, body, .stApp, [class*="css"] {
 /* ─── KPI tiles ──────────────────────── */
 .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin: 16px 0; }
 .kpi-tile {
-  background: var(--bg-card); border: 1px solid var(--border);
-  border-radius: 10px; padding: 16px 18px; position: relative; overflow: hidden;
+  background: linear-gradient(145deg, rgba(15, 25, 42, 0.98), rgba(8, 13, 22, 0.98));
+  border: 1px solid var(--border); border-radius: 14px;
+  padding: 18px; position: relative; overflow: hidden;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease;
 }
 .kpi-tile::before {
-  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
-  background: linear-gradient(90deg, var(--accent-cyan), var(--accent-violet));
+  content: ''; position: absolute; top: 0; left: 12px; right: 12px; height: 2px;
+  background: linear-gradient(90deg, var(--accent-cyan), var(--accent-blue), var(--accent-violet));
+  border-radius: 0 0 4px 4px;
+}
+.kpi-tile::after {
+  content: ''; position: absolute; width: 120px; height: 120px; right: -58px; top: -66px;
+  background: radial-gradient(circle, rgba(0, 212, 255, 0.09), transparent 70%);
+  pointer-events: none;
+}
+.kpi-tile:hover {
+  transform: translateY(-3px); border-color: rgba(0, 212, 255, 0.34);
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.20), 0 0 18px rgba(0, 212, 255, 0.05);
 }
 .kpi-label { font-size: 11px; color: var(--text-muted); font-weight: 600;
   text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; }
@@ -272,7 +302,7 @@ html, body, .stApp, [class*="css"] {
 }
 .stButton > button:hover {
   background: linear-gradient(135deg, rgba(0,212,255,0.25), rgba(68,136,255,0.25)) !important;
-  box-shadow: var(--glow-cyan) !important; transform: translateY(-1px) !important;
+  box-shadow: 0 2px 10px rgba(0,212,255,0.10) !important; transform: translateY(-1px) !important;
 }
 div[data-testid="stTabs"] [data-baseweb="tab"] {
   font-weight: 600 !important; font-size: 13px !important; color: var(--text-muted) !important;
@@ -281,6 +311,95 @@ div[data-testid="stTabs"] [data-baseweb="tab"] {
 div[data-testid="stTabs"] [aria-selected="true"] {
   color: var(--accent-cyan) !important;
   border-bottom: 2px solid var(--accent-cyan) !important;
+}
+
+/* Responsive application header */
+.app-hero {
+  display: flex; align-items: center; justify-content: space-between; gap: 24px;
+  padding: 26px clamp(16px, 3vw, 38px);
+  min-height: 126px; box-sizing: border-box; position: relative; isolation: isolate; overflow: hidden;
+  background:
+    radial-gradient(ellipse at 78% 0%, rgba(68, 136, 255, 0.18), transparent 36%),
+    radial-gradient(ellipse at 12% 110%, rgba(0, 212, 255, 0.12), transparent 42%),
+    linear-gradient(120deg, #070C15 0%, #0B1627 52%, #101C31 100%);
+  border-bottom: 1px solid rgba(148, 163, 184, 0.18);
+  box-shadow: 0 12px 34px rgba(0, 0, 0, 0.16);
+}
+.app-hero::before {
+  content: ''; position: absolute; inset: auto 0 0; height: 1px; z-index: -1;
+  background: linear-gradient(90deg, transparent, rgba(0,212,255,.65), rgba(139,92,246,.55), transparent);
+}
+.app-hero-brand { display: flex; align-items: center; gap: 16px; min-width: 0; }
+.app-hero-shield {
+  display: grid; place-items: center; width: 56px; height: 56px; flex: 0 0 56px;
+  font-size: 28px; border-radius: 16px;
+  background: linear-gradient(145deg, rgba(0,212,255,.15), rgba(68,136,255,.08));
+  border: 1px solid rgba(0,212,255,.26);
+  box-shadow: 0 0 28px rgba(0,212,255,.08), inset 0 1px rgba(255,255,255,.06);
+}
+.app-hero-copy { min-width: 0; }
+.app-hero-eyebrow {
+  color: #67E8F9; font-size: 9px; font-weight: 800; letter-spacing: .19em;
+  text-transform: uppercase; margin-bottom: 7px;
+}
+.app-hero-title {
+  color: #F8FAFC; font-size: clamp(21px, 2.4vw, 29px); font-weight: 800;
+  letter-spacing: -.035em; line-height: 1.12;
+  text-shadow: 0 2px 24px rgba(0,212,255,.10);
+}
+.app-hero-subtitle { color: #A7B4C8; font-size: 12px; margin-top: 7px; line-height: 1.5; }
+.app-hero-status { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; align-items: center; }
+.status-pill { padding: 7px 11px; border-radius: 999px; font-size: 10px; font-weight: 750;
+  color: #BAE6FD; background: rgba(56, 189, 248, 0.10); border: 1px solid rgba(56, 189, 248, 0.24);
+  box-shadow: inset 0 1px rgba(255,255,255,.035); white-space: nowrap; }
+.status-pill-muted { color: #CBD5E1; background: rgba(148, 163, 184, 0.07); border-color: rgba(148, 163, 184, 0.18); }
+
+/* Native sidebar radio styled as a clear navigation list */
+[data-testid="stSidebar"] [data-testid="stRadio"] > label { display: none; }
+[data-testid="stSidebar"] [data-testid="stRadio"] [role="radiogroup"] { gap: 4px; }
+[data-testid="stSidebar"] [data-testid="stRadio"] [role="radiogroup"] label {
+  padding: 10px 12px; margin: 3px 0; border: 1px solid transparent; border-radius: 10px;
+  background: rgba(255,255,255,0.012);
+  transition: background .18s ease, border-color .18s ease, transform .18s ease;
+}
+[data-testid="stSidebar"] [data-testid="stRadio"] [role="radiogroup"] label:hover {
+  background: rgba(148, 163, 184, 0.075); border-color: rgba(148, 163, 184, 0.16);
+  transform: translateX(2px);
+}
+[data-testid="stSidebar"] [data-testid="stRadio"] [role="radiogroup"] label:has(input:checked) {
+  background: linear-gradient(100deg, rgba(0, 212, 255, 0.15), rgba(68, 136, 255, 0.06));
+  border-color: rgba(56, 189, 248, 0.32);
+  box-shadow: inset 3px 0 0 #00D4FF, 0 5px 18px rgba(0, 0, 0, 0.12);
+}
+[data-testid="stSidebar"] [data-testid="stRadio"] [role="radiogroup"] label p { margin: 0; }
+
+/* Responsive layouts */
+@media (max-width: 1100px) {
+  .kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .kpi-value { font-size: 24px; }
+}
+@media (max-width: 700px) {
+  .app-hero { align-items: flex-start; flex-direction: column; gap: 14px; padding: 20px 16px; }
+  .app-hero-brand { gap: 12px; }
+  .app-hero-shield { width: 46px; height: 46px; flex-basis: 46px; font-size: 23px; border-radius: 13px; }
+  .app-hero-title { font-size: clamp(20px, 5vw, 25px); }
+  .app-hero-eyebrow { font-size: 8px; letter-spacing: .15em; }
+  .app-hero-status { justify-content: flex-start; }
+  .kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .kpi-tile { padding: 13px; }
+  .kpi-label { font-size: 10px; }
+  .kpi-value { font-size: 21px; overflow-wrap: anywhere; }
+  .card { padding: 16px; }
+  .section-title { font-size: 18px; }
+  .source-name { width: 88px; }
+  .source-pct { width: 42px; }
+  .block-container { padding-left: 0 !important; padding-right: 0 !important; }
+}
+@media (max-width: 420px) {
+  .kpi-grid { grid-template-columns: minmax(0, 1fr); }
+  .app-hero-subtitle { font-size: 11px; }
+  .decision-score { font-size: 30px; }
+  .eq-block { padding: 12px; font-size: 11px; overflow-wrap: anywhere; }
 }
 
 /* Scrollbar */
@@ -294,84 +413,20 @@ st.markdown(GLOBAL_CSS, unsafe_allow_html=True)
 
 # ── Particle / Sand Canvas hero ────────────────────────────────────────────────
 HERO_HTML = """
-<div style="width:100%;height:120px;position:relative;overflow:hidden;
-     background:linear-gradient(135deg,#03050A 0%,#080D16 50%,#0A1225 100%);
-     border-bottom:1px solid rgba(0,212,255,0.13);">
-  <canvas id="heroCanvas" style="position:absolute;inset:0;width:100%;height:100%;"></canvas>
-  <div style="position:absolute;inset:0;display:flex;align-items:center;gap:20px;padding:0 36px;z-index:2;">
-    <div style="font-size:36px;">🛡️</div>
-    <div>
-      <div style="font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:800;
-           color:#E8F0FE;letter-spacing:-0.02em;line-height:1.1;">
-        Android Software Trust
-      </div>
-      <div style="font-size:12px;color:#6B7FA3;font-weight:500;margin-top:4px;
-           font-family:'Inter',sans-serif;letter-spacing:0.03em;">
-        Source-Aware Evidence Fusion &nbsp;·&nbsp; Multi-Source Security Risk Assessment &nbsp;·&nbsp; GL Bajaj ITM
-      </div>
-    </div>
-    <div style="margin-left:auto;display:flex;gap:10px;align-items:center;">
-      <span style="background:rgba(0,212,255,0.12);border:1px solid rgba(0,212,255,0.28);
-            color:#00D4FF;font-size:10px;font-weight:700;padding:4px 12px;border-radius:20px;
-            text-transform:uppercase;letter-spacing:0.08em;">Research Prototype</span>
-      <span style="background:rgba(34,197,94,0.12);border:1px solid rgba(34,197,94,0.30);
-            color:#22C55E;font-size:10px;font-weight:700;padding:4px 12px;border-radius:20px;
-            text-transform:uppercase;letter-spacing:0.08em;">● Live</span>
+<div class="app-hero">
+  <div class="app-hero-brand">
+    <div class="app-hero-shield" aria-hidden="true">🛡️</div>
+    <div class="app-hero-copy">
+      <div class="app-hero-eyebrow">ANDROID SECURITY · EVIDENCE FUSION</div>
+      <div class="app-hero-title">Android Software Trust</div>
+      <div class="app-hero-subtitle">See the signals. Understand the risk. Make evidence-led decisions.</div>
     </div>
   </div>
+  <div class="app-hero-status">
+    <span class="status-pill">Research prototype</span>
+    <span class="status-pill status-pill-muted">Offline assessment demo</span>
+  </div>
 </div>
-<script>
-(function(){
-  const C=document.getElementById('heroCanvas');
-  if(!C)return;
-  const ctx=C.getContext('2d');
-  let W=C.offsetWidth,H=C.offsetHeight;
-  C.width=W;C.height=H;
-  const N=220,pts=[];
-  for(let i=0;i<N;i++){
-    pts.push({
-      x:Math.random()*W, y:Math.random()*H,
-      vx:(Math.random()-.5)*.35, vy:(Math.random()-.5)*.22,
-      r:Math.random()*1.6+.4,
-      alpha:Math.random()*.45+.05,
-      color: Math.random()<.6?'0,212,255':'139,92,246'
-    });
-  }
-  let mx=-999,my=-999;
-  C.addEventListener('mousemove',e=>{
-    const rc=C.getBoundingClientRect();
-    mx=e.clientX-rc.left; my=e.clientY-rc.top;
-  });
-  function frame(){
-    ctx.clearRect(0,0,W,H);
-    pts.forEach(p=>{
-      const dx=p.x-mx,dy=p.y-my,dist=Math.sqrt(dx*dx+dy*dy);
-      if(dist<90){const f=(90-dist)/90*1.2;p.vx+=dx/dist*f*.08;p.vy+=dy/dist*f*.08;}
-      p.vx*=.97;p.vy*=.97;
-      p.x+=p.vx;p.y+=p.vy;
-      if(p.x<0)p.x=W; if(p.x>W)p.x=0;
-      if(p.y<0)p.y=H; if(p.y>H)p.y=0;
-      // connect lines
-      pts.forEach(q=>{
-        if(q===p)return;
-        const ddx=p.x-q.x,ddy=p.y-q.y,d=Math.sqrt(ddx*ddx+ddy*ddy);
-        if(d<80){
-          ctx.beginPath();
-          ctx.strokeStyle=`rgba(${p.color},${(1-d/80)*.08})`;
-          ctx.lineWidth=.5;
-          ctx.moveTo(p.x,p.y);ctx.lineTo(q.x,q.y);ctx.stroke();
-        }
-      });
-      ctx.beginPath();
-      ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
-      ctx.fillStyle=`rgba(${p.color},${p.alpha})`;
-      ctx.fill();
-    });
-    requestAnimationFrame(frame);
-  }
-  frame();
-})();
-</script>
 """
 
 # ── Session state ──────────────────────────────────────────────────────────────
@@ -414,6 +469,7 @@ WHITE = "#E8F0FE"
 # ── Sidebar ────────────────────────────────────────────────────────────────────
 NAV_ITEMS = [
     ("overview",    "🏠", "Overview"),
+    ("playground",  "🧪", "Fusion Playground"),
     ("calculator",  "⚡", "Risk Calculator"),
     ("evidence",    "🔬", "Evidence Sources"),
     ("experiments", "📊", "Experiments"),
@@ -429,11 +485,19 @@ with st.sidebar:
            letter-spacing:0.1em;margin-bottom:14px;">Navigation</div>
     """, unsafe_allow_html=True)
 
-    for key, icon, label in NAV_ITEMS:
-        active = "active" if st.session_state.page == key else ""
-        if st.button(f"{icon}  {label}", key=f"nav_{key}", use_container_width=True):
-            st.session_state.page = key
-            st.rerun()
+    nav_keys = [key for key, _, _ in NAV_ITEMS]
+    nav_labels = {key: f"{icon}  {label}" for key, icon, label in NAV_ITEMS}
+    if "page_navigation" not in st.session_state:
+        st.session_state.page_navigation = st.session_state.page
+
+    st.radio(
+        "Navigation",
+        options=nav_keys,
+        format_func=lambda key: nav_labels[key],
+        key="page_navigation",
+        label_visibility="collapsed",
+    )
+    st.session_state.page = st.session_state.page_navigation
 
     st.markdown("</div>", unsafe_allow_html=True)
     st.markdown("---")
@@ -475,7 +539,7 @@ with st.sidebar:
     """, unsafe_allow_html=True)
 
 # ── Hero ───────────────────────────────────────────────────────────────────────
-components.html(HERO_HTML, height=122, scrolling=False)
+st.markdown(HERO_HTML, unsafe_allow_html=True)
 
 page = st.session_state.page
 cfg  = st.session_state.config
@@ -485,7 +549,7 @@ cfg  = st.session_state.config
 # ─────────────────────────────────────────────────────────────────────────────
 if page == "overview":
     st.markdown("""
-    <div style="padding:28px 36px 0;">
+    <div style="padding:24px clamp(16px, 3vw, 36px) 0;">
       <div class="section-header">
         <div class="section-title">System Overview</div>
         <div class="section-badge">Research Prototype</div>
@@ -494,7 +558,7 @@ if page == "overview":
     """, unsafe_allow_html=True)
 
     with st.container():
-        st.markdown('<div style="padding:0 36px;">', unsafe_allow_html=True)
+        st.markdown('<div style="padding:0 clamp(16px, 3vw, 36px);">', unsafe_allow_html=True)
 
         # KPI row
         st.markdown("""
@@ -524,7 +588,7 @@ if page == "overview":
 
         st.markdown("</div>", unsafe_allow_html=True)
 
-    st.markdown('<div style="padding:0 36px;">', unsafe_allow_html=True)
+    st.markdown('<div style="padding:0 clamp(16px, 3vw, 36px);">', unsafe_allow_html=True)
     col1, col2 = st.columns([3, 2], gap="large")
 
     with col1:
@@ -690,11 +754,264 @@ if page == "overview":
     st.markdown("</div>", unsafe_allow_html=True)
 
 # ─────────────────────────────────────────────────────────────────────────────
+# PAGE: FUSION PLAYGROUND
+# ─────────────────────────────────────────────────────────────────────────────
+elif page == "playground":
+    st.markdown("""
+    <div style="padding:24px clamp(16px, 3vw, 36px) 0;">
+      <div class="section-header">
+        <div>
+          <div class="section-title">Fusion Playground</div>
+          <div style="font-size:12px;color:#8EA2C5;margin-top:6px;">Change the signals. Watch the decision respond.</div>
+        </div>
+        <div class="section-badge">INTERACTIVE LAB</div>
+      </div>
+      <div class="alert-info" style="margin-bottom:18px;">
+        🧪 This is a hands-on sandbox for understanding how evidence, source importance, disagreement,
+        and missing signals affect a result. The numbers are illustrative inputs—not a live APK scan.
+      </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # Scenario buttons set widget state before the controls are created.
+    scene_col1, scene_col2, scene_col3, scene_col4 = st.columns(4, gap="small")
+    with scene_col1:
+        if st.button("🌤️ Low concern", use_container_width=True, key="lab_scene_low"):
+            st.session_state["lab_static"] = 0.12
+            st.session_state["lab_behaviour"] = 0.18
+            st.session_state["lab_network"] = 0.15
+            st.session_state["lab_use_static"] = True
+            st.session_state["lab_use_behaviour"] = True
+            st.session_state["lab_use_network"] = True
+            st.session_state["lab_weight_static"] = 0.20
+            st.session_state["lab_weight_behaviour"] = 0.60
+            st.session_state["lab_weight_network"] = 0.20
+    with scene_col2:
+        if st.button("🧩 Mixed signals", use_container_width=True, key="lab_scene_mixed"):
+            st.session_state["lab_static"] = 0.28
+            st.session_state["lab_behaviour"] = 0.72
+            st.session_state["lab_network"] = 0.43
+            st.session_state["lab_use_static"] = True
+            st.session_state["lab_use_behaviour"] = True
+            st.session_state["lab_use_network"] = True
+            st.session_state["lab_weight_static"] = 0.20
+            st.session_state["lab_weight_behaviour"] = 0.60
+            st.session_state["lab_weight_network"] = 0.20
+    with scene_col3:
+        if st.button("⚡ Conflicting", use_container_width=True, key="lab_scene_conflict"):
+            st.session_state["lab_static"] = 0.08
+            st.session_state["lab_behaviour"] = 0.92
+            st.session_state["lab_network"] = 0.12
+            st.session_state["lab_use_static"] = True
+            st.session_state["lab_use_behaviour"] = True
+            st.session_state["lab_use_network"] = True
+            st.session_state["lab_weight_static"] = 0.20
+            st.session_state["lab_weight_behaviour"] = 0.60
+            st.session_state["lab_weight_network"] = 0.20
+    with scene_col4:
+        if st.button("🔄 Reset lab", use_container_width=True, key="lab_scene_reset"):
+            st.session_state["lab_static"] = 0.25
+            st.session_state["lab_behaviour"] = 0.72
+            st.session_state["lab_network"] = 0.80
+            st.session_state["lab_use_static"] = True
+            st.session_state["lab_use_behaviour"] = True
+            st.session_state["lab_use_network"] = True
+            st.session_state["lab_weight_static"] = 0.20
+            st.session_state["lab_weight_behaviour"] = 0.60
+            st.session_state["lab_weight_network"] = 0.20
+
+    st.markdown('<div style="padding:0 clamp(16px, 3vw, 36px);">', unsafe_allow_html=True)
+    lab_inputs, lab_results = st.columns([0.95, 1.25], gap="large")
+
+    with lab_inputs:
+        st.markdown('<div class="card">', unsafe_allow_html=True)
+        st.markdown("""
+        <div style="font-size:15px;font-weight:800;color:#F1F5F9;margin-bottom:4px;">01 / Evidence signals</div>
+        <div style="font-size:12px;color:#8EA2C5;margin-bottom:14px;">Move the sliders and see the math update instantly.</div>
+        """, unsafe_allow_html=True)
+
+        lab_use_static = st.checkbox("📋 Static evidence", value=True, key="lab_use_static")
+        lab_static = st.slider("Static suspiciousness", 0.0, 1.0, 0.25, 0.01, key="lab_static",
+                               disabled=not lab_use_static, help="A value closer to 1 means this source sees stronger suspicious signals.")
+        st.markdown("<div style='height:4px;border-top:1px solid rgba(255,255,255,.06);margin:8px 0;'></div>", unsafe_allow_html=True)
+
+        lab_use_behaviour = st.checkbox("🧬 Behavioural evidence", value=True, key="lab_use_behaviour")
+        lab_behaviour = st.slider("Behavioural suspiciousness", 0.0, 1.0, 0.72, 0.01, key="lab_behaviour",
+                                  disabled=not lab_use_behaviour, help="Illustrates signals observed during application behaviour.")
+        st.markdown("<div style='height:4px;border-top:1px solid rgba(255,255,255,.06);margin:8px 0;'></div>", unsafe_allow_html=True)
+
+        lab_use_network = st.checkbox("🌐 Network evidence", value=True, key="lab_use_network")
+        lab_network = st.slider("Network suspiciousness", 0.0, 1.0, 0.80, 0.01, key="lab_network",
+                                disabled=not lab_use_network, help="Illustrates suspiciousness inferred from communication patterns.")
+
+        st.markdown("""
+        <div style="margin:18px 0 8px;border-top:1px solid rgba(255,255,255,.07);"></div>
+        <div style="font-size:15px;font-weight:800;color:#F1F5F9;margin-bottom:4px;">02 / What matters most?</div>
+        <div style="font-size:12px;color:#8EA2C5;margin-bottom:10px;">Set source importance. The values are automatically normalised to total 100%.</div>
+        """, unsafe_allow_html=True)
+
+        raw_ws = st.slider("Static importance", 0.0, 1.0, 0.20, 0.05, key="lab_weight_static")
+        raw_wb = st.slider("Behavioural importance", 0.0, 1.0, 0.60, 0.05, key="lab_weight_behaviour")
+        raw_wn = st.slider("Network importance", 0.0, 1.0, 0.20, 0.05, key="lab_weight_network")
+        raw_total = raw_ws + raw_wb + raw_wn
+        if raw_total <= 0:
+            weights = (1/3, 1/3, 1/3)
+            st.info("All importance sliders are zero, so equal weights are used until you increase one.")
+        else:
+            weights = (raw_ws / raw_total, raw_wb / raw_total, raw_wn / raw_total)
+
+        st.markdown(
+            f'<div class="alert-info" style="font-size:12px;margin-top:8px;">'
+            f'<b>Effective importance</b><br>Static {weights[0]:.0%} · Behavioural {weights[1]:.0%} · Network {weights[2]:.0%}'
+            f'</div>', unsafe_allow_html=True)
+        st.markdown("</div>", unsafe_allow_html=True)
+
+    # A local configuration keeps the playground separate from the saved application settings.
+    lab_cfg = FusionConfig(
+        static_weight=weights[0],
+        behaviour_weight=weights[1],
+        network_weight=weights[2],
+        decision_basis="trust",
+        scale_trust_by_coverage=True,
+    )
+    lab_result = fuse_evidence(
+        static_prob=lab_static if lab_use_static else None,
+        behaviour_prob=lab_behaviour if lab_use_behaviour else None,
+        network_prob=lab_network if lab_use_network else None,
+        config=lab_cfg,
+    )
+
+    with lab_results:
+        if not lab_result.has_evidence:
+            st.warning("Turn on at least one evidence source to calculate a result.")
+        else:
+            lab_decision = lab_result.trust_decision
+            lab_decision_style = {
+                "Trusted": ("decision-trusted", "#22C55E", "✓"),
+                "Review": ("decision-review", "#F59E0B", "⚠"),
+                "High Risk": ("decision-highrisk", "#FF3A5C", "!"),
+            }
+            dec_class, dec_color, dec_icon = lab_decision_style[lab_decision]
+            st.markdown(f"""
+            <div class="{dec_class}" style="margin-bottom:12px;position:relative;overflow:hidden;">
+              <div style="font-size:10px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:#8EA2C5;">LIVE RESULT</div>
+              <div class="decision-emoji">{dec_icon}</div>
+              <div class="decision-label" style="color:{dec_color};">{lab_decision}</div>
+              <div style="font-size:12px;color:#A7B4C8;margin-top:6px;">Trust score {lab_result.trust:.1%} · Fused risk {lab_result.risk:.1%}</div>
+            </div>
+            """, unsafe_allow_html=True)
+
+            lab_m1, lab_m2, lab_m3 = st.columns(3, gap="small")
+            with lab_m1:
+                st.metric("Fused risk", f"{lab_result.risk:.3f}", help="Weighted average of the available source risk values.")
+            with lab_m2:
+                st.metric("Disagreement", f"{lab_result.disagreement:.3f}", help="Weighted spread between source values and the fused result.")
+            with lab_m3:
+                st.metric("Coverage", f"{lab_result.coverage:.0%}", help="Sum of the original importance assigned to sources that are available.")
+
+            st.markdown('<div class="card" style="margin-top:12px;">', unsafe_allow_html=True)
+            st.markdown('<div style="font-size:15px;font-weight:800;color:#F1F5F9;margin-bottom:4px;">03 / Watch the calculation</div>', unsafe_allow_html=True)
+            st.markdown('<div style="font-size:12px;color:#8EA2C5;margin-bottom:14px;">Every number below is calculated from the controls on the left.</div>', unsafe_allow_html=True)
+
+            active_rows = [
+                ("Static", lab_static, weights[0], lab_use_static, CYAN),
+                ("Behavioural", lab_behaviour, weights[1], lab_use_behaviour, VIOLET),
+                ("Network", lab_network, weights[2], lab_use_network, LIME),
+            ]
+            active_rows = [row for row in active_rows if row[3]]
+            active_weight_total = sum(row[2] for row in active_rows)
+            st.markdown("**Step A — Renormalise available evidence**")
+            st.caption("Disabled sources are excluded; the remaining importance values are scaled back to 100%.")
+            eff_weights = {}
+            for src, risk_val, base_weight, _, color in active_rows:
+                eff = base_weight / active_weight_total if active_weight_total > 0 else 1 / len(active_rows)
+                eff_weights[src] = eff
+                st.markdown(
+                    f'<div class="source-row"><div class="source-name">{src}</div>'
+                    f'<div class="source-bar-wrap"><div class="progress-bar-wrap"><div class="progress-bar-fill" '
+                    f'style="width:{eff*100:.2f}%;background:{color};"></div></div></div>'
+                    f'<div class="source-pct" style="color:{color};">{eff:.1%}</div></div>',
+                    unsafe_allow_html=True)
+            risk_terms = " + ".join([f"({eff_weights[src]:.3f} × {risk_val:.2f})" for src, risk_val, _, _, _ in active_rows])
+            st.markdown("**Step B — Combine the available signals**")
+            st.markdown(
+                f'<div class="eq-block">R = {risk_terms} = <b>{lab_result.risk:.4f}</b></div>',
+                unsafe_allow_html=True)
+            st.markdown("**Step C — Measure source disagreement**")
+            disagree_terms = " + ".join([
+                f"({eff_weights[src]:.3f} × ({risk_val:.2f} − {lab_result.risk:.3f})²)"
+                for src, risk_val, _, _, _ in active_rows
+            ])
+            st.markdown(
+                f'<div class="eq-block">D = {disagree_terms} = <b>{lab_result.disagreement:.4f}</b></div>',
+                unsafe_allow_html=True)
+            st.markdown("**Step D — Combine risk, consistency and coverage**")
+            coverage_factor = math.sqrt(lab_result.coverage)
+            st.markdown(
+                f'<div class="eq-block" style="font-size:12px;overflow-wrap:anywhere;">'
+                f'T = (1 − {lab_result.risk:.4f}) × (1 − {lab_result.disagreement:.4f}) × √{lab_result.coverage:.3f}'
+                f'<br><span style="color:#8EA2C5;font-size:11px;">'
+                f'{(1-lab_result.risk):.4f} × {(1-lab_result.disagreement):.4f} × {coverage_factor:.4f}'
+                f'</span><br><b>= {lab_result.trust:.4f}</b></div>',
+                unsafe_allow_html=True)
+
+            st.markdown("</div>", unsafe_allow_html=True)
+
+            # Compare what changes when the user switches between the two most instructive weighting patterns.
+            st.markdown('<div class="card" style="margin-top:12px;">', unsafe_allow_html=True)
+            st.markdown('<div style="font-size:15px;font-weight:800;color:#F1F5F9;margin-bottom:4px;">04 / Why source importance matters</div>', unsafe_allow_html=True)
+            st.caption("Keep the same signals and compare the current setup with equal importance.")
+            equal_cfg = FusionConfig(
+                static_weight=1/3, behaviour_weight=1/3, network_weight=1/3,
+                decision_basis="trust", scale_trust_by_coverage=True,
+            )
+            equal_result = fuse_evidence(
+                static_prob=lab_static if lab_use_static else None,
+                behaviour_prob=lab_behaviour if lab_use_behaviour else None,
+                network_prob=lab_network if lab_use_network else None,
+                config=equal_cfg,
+            )
+            compare_df = pd.DataFrame({
+                "Setup": ["Your setup", "Equal importance"],
+                "Fused risk": [lab_result.risk, equal_result.risk],
+                "Trust score": [lab_result.trust, equal_result.trust],
+            })
+            fig_lab = go.Figure()
+            fig_lab.add_trace(go.Bar(
+                x=compare_df["Setup"], y=compare_df["Fused risk"], name="Fused risk",
+                marker_color=[CYAN, BLUE], text=[f"{v:.3f}" for v in compare_df["Fused risk"]],
+                textposition="outside",
+            ))
+            fig_lab.add_trace(go.Bar(
+                x=compare_df["Setup"], y=compare_df["Trust score"], name="Trust score",
+                marker_color=[VIOLET, LIME], text=[f"{v:.3f}" for v in compare_df["Trust score"]],
+                textposition="outside",
+            ))
+            lab_chart_layout = dict(PLOTLY_LAYOUT)
+            lab_chart_layout.update(
+                barmode="group",
+                height=300,
+                yaxis=dict(range=[0, 1.12], title="Score (0–1)", gridcolor="rgba(255,255,255,0.05)"),
+                legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="left", x=0),
+                margin=dict(l=12, r=12, t=45, b=12),
+            )
+            fig_lab.update_layout(**lab_chart_layout)
+            st.plotly_chart(fig_lab, use_container_width=True)
+            st.markdown(
+                '<div style="font-size:12px;color:#8EA2C5;line-height:1.65;">'
+                'Try disabling a source, making two sources disagree, or moving importance toward a weaker signal. '
+                'Notice that a lower fused risk does not automatically mean stronger trust: disagreement and missing evidence also matter.'
+                '</div>', unsafe_allow_html=True)
+            st.markdown("</div>", unsafe_allow_html=True)
+
+    st.markdown("</div>", unsafe_allow_html=True)
+
+# ─────────────────────────────────────────────────────────────────────────────
 # PAGE: RISK CALCULATOR
 # ─────────────────────────────────────────────────────────────────────────────
 elif page == "calculator":
     st.markdown("""
-    <div style="padding:28px 36px 0;">
+    <div style="padding:24px clamp(16px, 3vw, 36px) 0;">
       <div class="section-header">
         <div class="section-title">Evidence Fusion Calculator</div>
         <div class="section-badge">Interactive</div>
@@ -706,7 +1023,7 @@ elif page == "calculator":
     </div>
     """, unsafe_allow_html=True)
 
-    st.markdown('<div style="padding:0 36px;">', unsafe_allow_html=True)
+    st.markdown('<div style="padding:0 clamp(16px, 3vw, 36px);">', unsafe_allow_html=True)
     col_in, col_out = st.columns([1, 1], gap="large")
 
     with col_in:
@@ -921,7 +1238,7 @@ elif page == "calculator":
 # ─────────────────────────────────────────────────────────────────────────────
 elif page == "evidence":
     st.markdown("""
-    <div style="padding:28px 36px 0;">
+    <div style="padding:24px clamp(16px, 3vw, 36px) 0;">
       <div class="section-header">
         <div class="section-title">Evidence Sources</div>
         <div class="section-badge">Dataset Audit</div>
@@ -929,7 +1246,7 @@ elif page == "evidence":
     </div>
     """, unsafe_allow_html=True)
 
-    st.markdown('<div style="padding:0 36px;">', unsafe_allow_html=True)
+    st.markdown('<div style="padding:0 clamp(16px, 3vw, 36px);">', unsafe_allow_html=True)
 
     SRC_COLORS = {"Static / DREBIN": CYAN, "Behavioural / CICMalDroid": VIOLET, "Network / CIC-AndMal": LIME}
     SRC_ICONS  = {"Static / DREBIN": "📋", "Behavioural / CICMalDroid": "🧬", "Network / CIC-AndMal": "🌐"}
@@ -1029,7 +1346,7 @@ elif page == "evidence":
 # ─────────────────────────────────────────────────────────────────────────────
 elif page == "experiments":
     st.markdown("""
-    <div style="padding:28px 36px 0;">
+    <div style="padding:24px clamp(16px, 3vw, 36px) 0;">
       <div class="section-header">
         <div class="section-title">Research Experiments</div>
         <div class="section-badge">Ablation Studies</div>
@@ -1037,7 +1354,7 @@ elif page == "experiments":
     </div>
     """, unsafe_allow_html=True)
 
-    st.markdown('<div style="padding:0 36px;">', unsafe_allow_html=True)
+    st.markdown('<div style="padding:0 clamp(16px, 3vw, 36px);">', unsafe_allow_html=True)
 
     tab1, tab2, tab3, tab4, tab5 = st.tabs([
         "📈  Fig 1 — Fusion Gain",
@@ -1376,7 +1693,7 @@ elif page == "experiments":
 # ─────────────────────────────────────────────────────────────────────────────
 elif page == "config":
     st.markdown("""
-    <div style="padding:28px 36px 0;">
+    <div style="padding:24px clamp(16px, 3vw, 36px) 0;">
       <div class="section-header">
         <div class="section-title">Configuration</div>
         <div class="section-badge">Weights & Thresholds</div>
@@ -1388,7 +1705,7 @@ elif page == "config":
     </div>
     """, unsafe_allow_html=True)
 
-    st.markdown('<div style="padding:0 36px;">', unsafe_allow_html=True)
+    st.markdown('<div style="padding:0 clamp(16px, 3vw, 36px);">', unsafe_allow_html=True)
     col_cfg1, col_cfg2 = st.columns([1, 1], gap="large")
 
     with col_cfg1:
@@ -1507,7 +1824,7 @@ elif page == "config":
 # ─────────────────────────────────────────────────────────────────────────────
 elif page == "history":
     st.markdown("""
-    <div style="padding:28px 36px 0;">
+    <div style="padding:24px clamp(16px, 3vw, 36px) 0;">
       <div class="section-header">
         <div class="section-title">Assessment History</div>
         <div class="section-badge">Local Session</div>
@@ -1515,7 +1832,7 @@ elif page == "history":
     </div>
     """, unsafe_allow_html=True)
 
-    st.markdown('<div style="padding:0 36px;">', unsafe_allow_html=True)
+    st.markdown('<div style="padding:0 clamp(16px, 3vw, 36px);">', unsafe_allow_html=True)
     history: AssessmentHistory = st.session_state.history
 
     h_col1, h_col2, h_col3 = st.columns(3, gap="small")
@@ -1592,7 +1909,7 @@ elif page == "history":
 # ─────────────────────────────────────────────────────────────────────────────
 elif page == "about":
     st.markdown("""
-    <div style="padding:28px 36px 0;">
+    <div style="padding:24px clamp(16px, 3vw, 36px) 0;">
       <div class="section-header">
         <div class="section-title">About & Limitations</div>
         <div class="section-badge">Transparency</div>
@@ -1600,7 +1917,7 @@ elif page == "about":
     </div>
     """, unsafe_allow_html=True)
 
-    st.markdown('<div style="padding:0 36px;">', unsafe_allow_html=True)
+    st.markdown('<div style="padding:0 clamp(16px, 3vw, 36px);">', unsafe_allow_html=True)
 
     col_a1, col_a2 = st.columns([3, 2], gap="large")
     with col_a1:
@@ -1709,7 +2026,7 @@ elif page == "about":
 
 # ── Footer ─────────────────────────────────────────────────────────────────────
 st.markdown("""
-<div style="margin:40px 36px 20px;padding:16px 20px;background:var(--bg-panel);
+<div style="margin:32px clamp(16px, 3vw, 36px) 20px;padding:16px 20px;background:var(--bg-panel);
      border:1px solid var(--border);border-radius:10px;
      display:flex;justify-content:space-between;align-items:center;font-size:11px;color:#3A4A6B;">
   <div>
